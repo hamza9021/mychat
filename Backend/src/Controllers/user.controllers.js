@@ -52,6 +52,7 @@ const registerUser = wrapperFunction(async (req, res) => {
 
 const loginUser = wrapperFunction(async (req, res) => {
     const { email, password } = req.body;
+    console.log(req.body);
 
     const { error } = loginUserValidator.validate(req.body);
 
