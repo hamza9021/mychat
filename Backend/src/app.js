@@ -9,7 +9,11 @@ const app = express();
 
 import { userRouter } from "./Routes/user.routes.js";
 
-app.use(cors());
+app.use(cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -19,7 +23,7 @@ app.use("/api/v1/users", userRouter);
 
 
 
-app.use("/health", (req, res) => {
+app.use("/health", ( _ , res) => {
     res.status(200).json({ message: "Server is running" });
 });
 

@@ -3,7 +3,8 @@ import axiosInstance from "./AxiosInstance/axios.js";
 class User {
     registerUser = async (userData) => {
         try {
-            const response = await axiosInstance.post("/api/users/register", userData);
+            console.log("Registering user with data:", userData);
+            const response = await axiosInstance.post("/v1/users/register", userData);
             return response.data;
         } catch (error) {
             console.error("Error registering user:", error);
@@ -11,3 +12,6 @@ class User {
         }
     };
 }
+
+
+export const userApi = new User();

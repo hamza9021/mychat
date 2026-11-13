@@ -6,4 +6,9 @@ const registerUserValidator = Joi.object({
     password: Joi.string().min(6).required()
 });
 
-export { registerUserValidator };
+const loginUserValidator = Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().min(6).required()
+});
+
+export { registerUserValidator, loginUserValidator };

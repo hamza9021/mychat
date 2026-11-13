@@ -1,10 +1,11 @@
-import { ApiError, wrapperFunction, ApiResponse } from "../Utils/index.js";
+import { ApiError, wrapperFunction, ApiResponse, cookiesOptions, generateAccessAndRefreshToken } from "../Utils/index.js";
 import User from "../Models/user.models.js";
-import { registerUserValidator } from "../Validators/users.validators.js";
+import { registerUserValidator, loginUserValidator } from "../Validators/users.validators.js";
 import { uploadOnCloudinary } from "../Services/cloudinary.services.js";
 
 const registerUser = wrapperFunction(async (req, res) => {
     const { username, email, password } = req.body;
+    console.log(req.body);
     const { error } = registerUserValidator.validate(req.body);
 
     if (error) {
@@ -49,4 +50,43 @@ const registerUser = wrapperFunction(async (req, res) => {
 });
 
 
-export { registerUser };
+const loginUser = wrapperFunction(async (req, res) => {
+    const { email, password } = req.body;
+
+    const { error } = loginUserValidator.validate(req.body);
+
+    if (error) {
+        throw new ApiError(
+            400,
+            "Fields should not be empty and password should be at least 6 characters long"
+        );
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    const isPasswordValid = await user.isPasswordMatch(password);
+
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+        user._id
+    );
+    const updatedUser = await User.findById(user._id).select(
+        "-password -refreshToken"
+    );
+
+    if (!isPasswordValid) {
+        throw new ApiError(401, "Invalid password");
+    }
+
+    return res
+        .cookie("accessToken", accessToken, cookiesOptions)
+        .cookie("refreshToken", refreshToken, cookiesOptions)
+        .status(200)
+        .json(new ApiResponse(200, updatedUser, "User Logged In Successfully"));
+});
+
+
+export { registerUser, loginUser };
